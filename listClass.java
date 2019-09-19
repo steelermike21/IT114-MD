@@ -10,24 +10,18 @@ public class listClass {
 
 static Random rand =new Random();
 
+	
+	  //trying to get this code to work but could not 
 	/*
-	 * //trying to get this code to work but could not public void knuth
-	 * (ArrayList<String> arrayList) { for(int i=0; i<arrayList.size();i++) { int
-	 * randomNum=rand.nextInt(arrayList.size()); String temp = arrayList<i>;
-	 * arrayList<i>=arrayList<randomNum>; arrayList<randomNum>=temp;
-	 * 
-	 * 
-	 * } System.out.println(arrayList);
-	 * 
-	 * 
-	 * }
+	 * public void knuth (ArrayList<String> arrayList) { for(int i=0;
+	 * i<arrayList.size();i++) { int randomNum=rand.nextInt(arrayList.size());
+	 * String temp = arrayList<i>; arrayList<i>=arrayList<randomNum>;
+	 * arrayList<randomNum>=temp;
 	 */
+	  
+	  
+	  
 	 
-
-
-    
-
-    
     
 
 	
@@ -89,15 +83,19 @@ static Random rand =new Random();
 		}
 		
 		System.out.println("The total of all the numbers in intList is: " + total);
-	
 		
-	
+		
+		int n = stringList.size();
+        for (int i = 0; i < n; i++) {
+            // choose index uniformly in [0, i]
+            int r = (int) (Math.random() * (i + 1));
+            Object swap = stringList.get(r);
+            stringList.set(r, stringList.get(i));
+            stringList.set(i, (String)swap);
+        }
+        
+        System.out.println(stringList);
 
-
-
-
-	
-
-}
+	}
 }
 
