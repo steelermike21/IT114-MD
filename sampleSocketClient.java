@@ -43,6 +43,17 @@ public class sampleSocketClient {
 					}
 					else {
 						break;
+						
+					}
+					line = "";
+					String fromServer = in.readLine();
+					if(fromServer != null) {
+						System.out.println("Reply from server with amount of characters in your message: " + fromServer);
+						
+					}
+					else {
+						System.out.println("Server disconnected");
+						break;
 					}
 				}
 				catch(Exception e) {
@@ -60,7 +71,18 @@ public class sampleSocketClient {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		sampleSocketClient client = new sampleSocketClient();
-		client.connection("127.0.0.1", 3001);
+		int port = -1;
+		try {
+			port = Integer.parseInt(args[0]);
+		}
+		catch(Exception e){
+			System.out.println("Invalid port");
+			
+		}
+		if(port == -1) {
+			return;
+		}
+		client.connection("127.0.0.1", port);
 		try {
 			client.start();
 		}
