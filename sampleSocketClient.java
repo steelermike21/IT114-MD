@@ -14,7 +14,7 @@ public class sampleSocketClient {
 		
 		try {
 			server = new Socket(address, port);
-			System.out.println("Client connected");
+			System.out.println("User connected");
 			
 		}
 		catch(Exception e) {
@@ -22,50 +22,94 @@ public class sampleSocketClient {
 		}
 		
 	}
-	public void start() {
+	
+	public void start() throws IOException {
 		if(server == null) {
-			System.out.println("Server is not set bro");
 			return;
 		}
-		System.out.println("Listening for console input...");
-		try(
-				Scanner si = new Scanner(System.in);
+		System.out.println("Client Started");
+		try(Scanner si = new Scanner(System.in);
 				PrintWriter out = new PrintWriter(server.getOutputStream(), true);
-				BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));
-				){
-			String line ="";
-			while(true) {
-				try {
-					System.out.println("Waiting for user input..");
-					line = si.nextLine();
-					if(!"quit".equalsIgnoreCase(line)) {
-						out.println(line);
+				BufferedReader in = new BufferedReader(new InputStreamReader(server.getInputStream()));){
+			//Thread to listen for keyboard input so main thread isn't blocked
+			Thread inputThread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						while(!server.isClosed()) {
+							System.out.println("Waiting for input");
+							String line = si.nextLine();
+							if(!"quit".equalsIgnoreCase(line) && line != null) {
+								out.println(line);
+							}
+							else {
+								System.out.println("Stopping input thread");
+								break;
+							}
+						}
 					}
-					else {
-						break;
-						
+					catch(Exception e) {
+						System.out.println("Client shutdown");
 					}
-					line = "";
-					String fromServer = in.readLine();
-					if(fromServer != null) {
-						System.out.println("Reply from server with amount of characters in your message: " + fromServer);
-						
-					}
-					else {
-						System.out.println("Server disconnected");
-						break;
+					finally {
+						close();
 					}
 				}
-				catch(Exception e) {
-					e.printStackTrace();
-					
+			};
+			inputThread.start();//start the thread
+			
+			//Thread to listen for responses from server so it doesn't block main thread
+			Thread fromServerThread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						String fromServer = "";
+						while(!server.isClosed() && (fromServer = in.readLine()) != null) {
+							System.out.println("Reply from server: " + fromServer);
+						}
+						System.out.println("Disconnecting as requested");
+					}
+					catch (Exception e) {
+						if(!server.isClosed()) {
+							e.printStackTrace();
+							System.out.println("Server closed connection");
+						}
+						else {
+							System.out.println("Connection closed");
+						}
+					}
+					finally {
+						close();
+					}
 				}
+			};
+			fromServerThread.start();//start the thread
+			
+			//Keep main thread alive until the socket is closed
+			while(!server.isClosed()) {
+				Thread.sleep(50);
 			}
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			System.out.println("Disconnected");
+			System.exit(0);//force close
+			//TODO implement cleaner closure when server stops before client
+			//currently hangs/waits on the console/scanner input
 		}
-		
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			close();
+		}
+	}
+	private void close() {
+		if(server != null && !server.isClosed()) {
+			try {
+				server.close();
+				System.out.println("Closed socket");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public static void main(String[] args) {
