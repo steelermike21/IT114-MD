@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-//SOme extra code in here as im trying to get private messaging to work
+//SOme extra code in here as im trying to get private messaging to work .... 12/12/ now complete
 public class ClientandHandler extends Thread {
 	
 	Socket socket;
