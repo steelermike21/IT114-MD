@@ -33,12 +33,41 @@ public class ClientandHandler extends Thread {
 		buff=new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		writerguy= new PrintWriter(socket.getOutputStream(), true);
 		user=buff.readLine();
-		for(ClientandHandler update: handlers) {
-			update.writerguy.println("The following user " +getUser()+" Has joined the chat, say hi!");
+		for(ClientandHandler update: handlers) {//loops through when someone joins the chat
+			update.writerguy.println("The following user " +getUser()+" Has joined the chat");
 			update.sendList();
 		}
-		temp="";
-	
+		temp="";//while loop that allows private messaging to happen
+		while((temp = buff.readLine()) != null){
+			if(temp.contains("&user=")){
+				int beginUsername=temp.indexOf("&user=")+6;
+				String message=temp.substring(0, temp.indexOf("&user="));
+				String privUser=temp.substring(beginUsername).trim();
+				for(ClientandHandler update:handlers){
+					if(update.getUser().equals(privUser)){
+						update.writerguy.println(getUser()+": (PRIVATE) "+message);
+					}
+				}
+				this.writerguy.println(getUser()+": (PRIVATE) "+message);
+			}
+			else{
+				for (ClientandHandler update : handlers){
+
+					if(temp.trim().equals("418")){
+						status=true;
+					}
+					else{	
+						update.writerguy.println(getUser()+": "+temp);
+					}
+
+				}
+
+			}
+			if(status){
+				handlers.remove(this);
+				break;
+			}
+		}
 	}
 	
 	catch(IOException e) {
@@ -53,11 +82,11 @@ public class ClientandHandler extends Thread {
 			update.sendList();}
 		}
 	}
-		
+		//gets users
 	public String getUser() {
 		return user;
 	}
-	
+	//sends the list to the UI
 	public void sendList() {
 		writerguy.println(handlers.size());
 		for(ClientandHandler update:handlers) {
